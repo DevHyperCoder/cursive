@@ -51,6 +51,10 @@ pub struct Cursive {
 
     // Handle auto-refresh when no event is received.
     fps: Option<NonZeroU32>,
+
+    // List of callbacks to run on the backend.
+    // The current assumption is that we only add calls here during event processing.
+    pub(crate) backend_calls: Vec<Box<dyn FnOnce(&mut dyn backend::Backend)>>,
 }
 
 /// Identifies a screen in the cursive root.
@@ -95,6 +99,7 @@ impl Cursive {
             cb_sink,
             fps: None,
             user_data: Box::new(()),
+            backend_calls: Vec::new(),
         };
         cursive.reset_default_callbacks();
 
@@ -217,6 +222,15 @@ impl Cursive {
         T: Any,
     {
         self.user_data().map(f)
+    }
+
+    /// Sets the title for the terminal window.
+    ///
+    /// Note that not all backends support this.
+    pub fn set_window_title<S: Into<String>>(&mut self, title: S) {
+        let title = title.into();
+        self.backend_calls
+            .push(Box::new(move |backend| backend.set_title(title)));
     }
 
     /// Show the debug console.
@@ -547,16 +561,6 @@ impl Cursive {
         self.root.call_on_all(&view::Selector::Name(name), callback);
     }
 
-    /// Same as [`call_on_name`](Cursive::call_on_name).
-    #[deprecated(note = "`call_on_id` is being renamed to `call_on_name`")]
-    pub fn call_on_id<V, F, R>(&mut self, id: &str, callback: F) -> Option<R>
-    where
-        V: View,
-        F: FnOnce(&mut V) -> R,
-    {
-        self.call_on_name(id, callback)
-    }
-
     /// Convenient method to find a view wrapped in [`NamedView`].
     ///
     /// This looks for a `NamedView<V>` with the given name, and return
@@ -569,7 +573,7 @@ impl Cursive {
     /// # use cursive_core::Cursive;
     /// # use cursive_core::views::{TextView, ViewRef};
     /// # let mut siv = Cursive::new();
-    /// use cursive_core::traits::Identifiable;
+    /// use cursive_core::traits::Nameable;
     ///
     /// siv.add_layer(TextView::new("foo").with_name("id"));
     ///
@@ -585,7 +589,7 @@ impl Cursive {
     /// # use cursive_core::Cursive;
     /// # use cursive_core::views::{SelectView};
     /// # let mut siv = Cursive::new();
-    /// use cursive_core::traits::Identifiable;
+    /// use cursive_core::traits::Nameable;
     ///
     /// let select = SelectView::new().item("zero", 0u32).item("one", 1u32);
     /// siv.add_layer(select.with_name("select"));
@@ -609,15 +613,6 @@ impl Cursive {
         self.call_on_name(id, views::NamedView::<V>::get_mut)
     }
 
-    /// Same as [`find_name`](Cursive::find_name).
-    #[deprecated(note = "`find_id` is being renamed to `find_name`")]
-    pub fn find_id<V>(&mut self, id: &str) -> Option<views::ViewRef<V>>
-    where
-        V: View,
-    {
-        self.find_name(id)
-    }
-
     /// Moves the focus to the view identified by `name`.
     ///
     /// Convenient method to call `focus` with a [`view::Selector::Name`].
@@ -626,12 +621,6 @@ impl Cursive {
         name: &str,
     ) -> Result<EventResult, ViewNotFound> {
         self.focus(&view::Selector::Name(name))
-    }
-
-    /// Same as [`focus_name`](Cursive::focus_name).
-    #[deprecated(note = "`focus_id` is being renamed to `focus_name`")]
-    pub fn focus_id(&mut self, id: &str) -> Result<EventResult, ViewNotFound> {
-        self.focus(&view::Selector::Name(id))
     }
 
     /// Moves the focus to the view identified by `sel`.

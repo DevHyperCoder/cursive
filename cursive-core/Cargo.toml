@@ -30,8 +30,11 @@ unicode-width = "0.1"
 xi-unicode = "0.3"
 crossbeam-channel = "0.5"
 lazy_static = "1"
-chrono = "0.4"
 ahash = "0.7"
+
+[dependencies.time]
+version = "0.3"
+features = ["local-offset", "formatting"]
 
 [dependencies.toml]
 optional = true

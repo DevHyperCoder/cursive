@@ -38,10 +38,10 @@ macro_rules! new_default(
 /// Re-export crates used in the public API
 pub mod reexports {
     pub use ahash;
-    pub use chrono;
     pub use crossbeam_channel;
     pub use enumset;
     pub use log;
+    pub use time;
 
     #[cfg(feature = "toml")]
     pub use toml;

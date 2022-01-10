@@ -387,6 +387,11 @@ impl backend::Backend for Backend {
         "pancurses"
     }
 
+    fn set_title(&mut self, title: String) {
+        print!("\x1B]0;{}\x07", title);
+        stdout().flush().expect("could not flush stdout");
+    }
+
     fn screen_size(&self) -> Vec2 {
         // Coordinates are reversed here
         let (y, x) = self.window.get_max_yx();

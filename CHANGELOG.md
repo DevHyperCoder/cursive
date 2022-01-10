@@ -1,5 +1,51 @@
 # Changelog
 
+## Next version (cursive-core 0.3.0, cursive 0.17.0)
+
+### API updates
+
+- Add getters & other utility methods to Dialog
+- Add enabled state to menu items
+- Add a `reexports` module with re-exports of crates used in public API
+- Add `ThemedView`
+- Replace `Rect: From<T: Into<Vec2>>` with `Rect::from_point`
+- Add `HideableView::visible`
+- Add more control to focus changes, including `Event::FocusLost`
+- Add `EventResult::with_cb_once`
+- Add `Effect::Dim` (supported on some backends)
+- Add `LinearLayout::clear`
+- Add `backends::try_default`
+- Add `StackView::layer_offset` and deprecate `StackView::offset`
+- Add `Cursive::set_window_title` to change the terminal window title
+
+### Breaking Changes
+
+- Dependencies update:
+    - Replaced `wasmer_enumset` with `enumset`
+    - Replaced `chrono` with `time` for logger
+- Removed a bunch of deprecated methods and types:
+    - All `_id` methods that were replaced with `_name` equivalent
+    - `BoxView`, `ViewBox`, `SizedView`, `Identifiable`, `Boxable`, `IdView`, `Selector::Id`
+- Added `set_title` to the `Backend` trait
+
+### Bugfixes
+
+- Fix an issue with focus for Dialog
+- Fix `important_area` for ListView
+- Do not shrink panels under the size required for the title
+- Include wheel down event on legacy pancurses systems
+- Use non-blocking IO on termion backend
+- Fix `Align::bot_right`
+- Fix delimiter handling in `ListView`
+- Fix input handling in crossterm backend
+- Fix focus issue with SelectView when in popup mode
+
+## cursive 0.16.3
+
+### API updates
+
+- Implement `Borrow<Cursive>` for `CursiveRunnable`
+
 ## cursive-core 0.2.2, cursive 0.16.2
 
 ### API updates
